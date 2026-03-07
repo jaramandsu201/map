@@ -13,19 +13,17 @@
 {
     "file": "154kV.geojson",
     "color": "#91522d",
-    "name": "154kV",
-    "fields": ["no", "주소"] 
+    "name": "154kV"
   },
 {
     "file": "756kV.geojson",
     "color": "blue",
-    "name": "756kV",
-    "fields": ["no", "주소"] 
+    "name": "756kV"
   },
 {
     "file": "345kV.geojson",
     "color": "blue",
-    "name": "345kV",
-    "fields": ["no", "주소"] 
+    "name": "345kV"
   }
+
 ]
