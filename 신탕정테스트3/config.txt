@@ -1,7 +1,7 @@
 [
   {
     "file": "가공.geojson",
-    "color": "red",
+    "color": "yellow",
     "name": "가공라인"
   },
   {
@@ -18,13 +18,13 @@
   },
 {
     "file": "756kV.geojson",
-    "color": "blue",
+    "color": "green",
     "name": "756kV",
     "fields": ["no", "주소"] 
   },
 {
     "file": "345kV.geojson",
-    "color": "blue",
+    "color": "red",
     "name": "345kV",
     "fields": ["no", "주소"] 
   }
