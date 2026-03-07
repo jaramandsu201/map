@@ -5,7 +5,7 @@
     "name": "가공라인"
   },
   {
-    "file": "조사시점.geojson",
+    "file": "조사지점.geojson",
     "color": "blue",
     "name": "조사지점",
     "fields": ["id", "addr"] 
@@ -13,19 +13,19 @@
 {
     "file": "154kV.geojson",
     "color": "#91522d",
-    "name": "조사지점",
+    "name": "154kV",
     "fields": ["no", "주소"] 
   },
 {
     "file": "756kV.geojson",
     "color": "blue",
-    "name": "조사지점",
+    "name": "756kV",
     "fields": ["no", "주소"] 
   },
 {
     "file": "345kV.geojson",
     "color": "blue",
-    "name": "조사지점",
+    "name": "345kV",
     "fields": ["no", "주소"] 
   }
 ]
