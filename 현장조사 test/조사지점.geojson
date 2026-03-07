@@ -1,0 +1,15 @@
+{
+"type": "FeatureCollection",
+"name": "조사지점",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "addr": null }, "geometry": { "type": "Point", "coordinates": [ 127.121672354948799, 37.617235494880433 ] } },
+{ "type": "Feature", "properties": { "id": 2, "addr": "test2" }, "geometry": { "type": "Point", "coordinates": [ 127.039249146757683, 37.330546075085216 ] } },
+{ "type": "Feature", "properties": { "id": 3, "addr": "test3" }, "geometry": { "type": "Point", "coordinates": [ 127.082252559726967, 36.98651877133095 ] } },
+{ "type": "Feature", "properties": { "id": 4, "addr": "test4" }, "geometry": { "type": "Point", "coordinates": [ 127.308020477815688, 36.764334470989652 ] } },
+{ "type": "Feature", "properties": { "id": 5, "addr": "test5" }, "geometry": { "type": "Point", "coordinates": [ 127.587542662116036, 36.624573378839479 ] } },
+{ "type": "Feature", "properties": { "id": 6, "addr": "test6" }, "geometry": { "type": "Point", "coordinates": [ 127.863481228668931, 36.753583617747331 ] } },
+{ "type": "Feature", "properties": { "id": 7, "addr": "test7" }, "geometry": { "type": "Point", "coordinates": [ 128.049829351535834, 37.047440273037431 ] } },
+{ "type": "Feature", "properties": { "id": 8, "addr": "test8" }, "geometry": { "type": "Point", "coordinates": [ 128.003242320819112, 37.309044368600574 ] } }
+]
+}
