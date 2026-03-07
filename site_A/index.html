@@ -2,17 +2,17 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>현장조사 실시간 지도</title>
+    <title>현장조사 실시간 지도 (V-World)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
         body { margin:0; padding:0; }
-        #map { height: 100vh; width: 100vw; }
+        #map { height: 100vh; width: 100vw; background: #f0f0f0; }
         .location-control {
             position: absolute; bottom: 30px; right: 20px; z-index: 1000;
         }
         .loc-btn {
-            width: 50px; height: 50px; background: white; border: 2px solid #3388ff;
+            width: 50px; height: 50px; background: white; border: 2px solid #0055ff;
             border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
         }
@@ -27,16 +27,24 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-// 1. 지도 초기 설정 (기본 위치: 한국 중심)
+// 1. 지도 초기 설정
 var map = L.map('map').setView([36.5, 127.5], 7);
 
-// 2. 배경 지도 (Esri 최신 위성영상)
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri',
-    maxZoom: 19
+// 2. 배경 지도 → 대한민국 국토교통부 V-World 항공사진 (최신)
+var vworldSatellite = L.tileLayer('https://xdworld.vworld.kr/2d/Satellite/service/{z}/{x}/{y}.jpeg', {
+    attribution: '&copy; V-World / MOLIT',
+    maxZoom: 19,
+    minZoom: 6
 }).addTo(map);
 
-// 팝업 설정 함수
+// [선택사항] 하이브리드 레이어 (항공사진 위에 도로명/지명 표시)
+// 필요하시면 아래 주석을 해제하세요.
+/*
+var vworldHybrid = L.tileLayer('https://xdworld.vworld.kr/2d/Hybrid/service/{z}/{x}/{y}.png', {
+    maxZoom: 19
+}).addTo(map);
+*/
+
 function onEachFeature(feature, layer) {
     if (feature.properties) {
         var popupContent = Object.keys(feature.properties)
@@ -46,7 +54,7 @@ function onEachFeature(feature, layer) {
     }
 }
 
-// 3. GeoJSON 데이터 로드
+// 3. GeoJSON 데이터 로드 (경로 및 변수명 유지)
 fetch('./가공.geojson').then(res => res.json()).then(data => {
     L.geoJSON(data, { style: { color: 'red', weight: 3, opacity: 0.8 }, onEachFeature: onEachFeature }).addTo(map);
 }).catch(e => console.log("가공 로드 대기..."));
@@ -58,21 +66,17 @@ fetch('./조사시점.geojson').then(res => res.json()).then(data => {
         },
         onEachFeature: onEachFeature
     }).addTo(map);
-    // 데이터 로드 시 데이터 영역으로 한 번만 이동
     if(data.features.length > 0) map.fitBounds(geoLayer.getBounds());
 }).catch(e => console.log("조사시점 로드 대기..."));
 
-// 4. 위치 추적 로직 (절대 자동 실행 금지)
+// 4. 위치 추적 로직 (수동 실행 전용)
 var currentMarker = null;
 var currentCircle = null;
 
-// 위치를 찾았을 때 실행되는 함수
 map.on('locationfound', function(e) {
-    // 기존 마커 제거
     if (currentMarker) map.removeLayer(currentMarker);
     if (currentCircle) map.removeLayer(currentCircle);
 
-    // 새 마커 추가
     currentMarker = L.circleMarker(e.latlng, {
         radius: 10, fillColor: '#0078ff', color: 'white', weight: 3, opacity: 1, fillOpacity: 1
     }).addTo(map).bindPopup("내 현재 위치").openPopup();
@@ -81,29 +85,21 @@ map.on('locationfound', function(e) {
         color: '#0078ff', fillOpacity: 0.1, weight: 1
     }).addTo(map);
 
-    // [핵심] 사용자가 요청했을 때만 이 위치로 지도를 이동시킴
     map.setView(e.latlng, 18);
-    
-    // 위치를 찾자마자 GPS 수신을 즉시 종료합니다. (추가 튕김 방지)
-    map.stopLocate();
-    console.log("위치 확인 완료 및 추적 종료");
+    map.stopLocate(); // 위치 찾은 후 즉시 정지
 });
 
 map.on('locationerror', function(e) {
     alert("위치 정보를 가져올 수 없습니다. GPS 권한을 확인하세요.");
 });
 
-// 버튼 전용 함수
 function manualLocate() {
-    // watch를 false로 두어 실시간 추적을 원천 봉쇄합니다.
     map.locate({
         setView: false, 
         watch: false, 
         enableHighAccuracy: true 
     });
 }
-
-// [절대 주의] 기존 코드에 있던 startTracking(); 자동 호출을 삭제했습니다.
 </script>
 </body>
 </html>
