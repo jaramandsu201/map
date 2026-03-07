@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>현장조사 실시간 지도</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        body { margin:0; padding:0; }
+        #map { height: 100vh; width: 100vw; }
+        .location-control {
+            position: absolute; bottom: 30px; right: 20px; z-index: 1000;
+        }
+        .loc-btn {
+            width: 50px; height: 50px; background: white; border: 2px solid #3388ff;
+            border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="location-control">
+    <button class="loc-btn" onclick="startTracking()" title="내 위치 찾기">📍</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// 1. 지도 초기 설정
+var map = L.map('map').setView([37.0, 127.1], 8);
+
+// 2. 배경 지도 (Esri 최신 위성영상)
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 19
+}).addTo(map);
+
+// 팝업 설정 함수
+function onEachFeature(feature, layer) {
+    if (feature.properties) {
+        var popupContent = Object.keys(feature.properties)
+            .map(key => `<b>${key}:</b> ${feature.properties[key]}`)
+            .join("<br>");
+        layer.bindPopup(popupContent);
+    }
+}
+
+// 3. GeoJSON 데이터 로드
+fetch('./가공.geojson').then(res => res.json()).then(data => {
+    L.geoJSON(data, { style: { color: 'red', weight: 3, opacity: 0.8 }, onEachFeature: onEachFeature }).addTo(map);
+}).catch(e => console.log("가공 로드 대기..."));
+
+fetch('./조사시점.geojson').then(res => res.json()).then(data => {
+    var geoLayer = L.geoJSON(data, {
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, { radius: 7, fillColor: "#3388ff", color: "#fff", weight: 2, opacity: 1, fillOpacity: 0.9 });
+        },
+        onEachFeature: onEachFeature
+    }).addTo(map);
+    if(data.features.length > 0) map.fitBounds(geoLayer.getBounds());
+}).catch(e => console.log("조사시점 로드 대기..."));
+
+// 4. 위치 추적 로직 (단발성 실행으로 변경)
+var currentMarker = null;
+var currentCircle = null;
+
+function onLocationFound(e) {
+    // 기존 마커가 있다면 제거 (새로 찍기 위해)
+    if (currentMarker) map.removeLayer(currentMarker);
+    if (currentCircle) map.removeLayer(currentCircle);
+
+    // 현재 위치에 마커와 정확도 원 표시
+    currentMarker = L.circleMarker(e.latlng, {
+        radius: 10, fillColor: '#0078ff', color: 'white', weight: 3, opacity: 1, fillOpacity: 1
+    }).addTo(map).bindPopup("내 현재 위치").openPopup();
+
+    currentCircle = L.circle(e.latlng, e.accuracy / 2, {
+        color: '#0078ff', fillOpacity: 0.1, weight: 1
+    }).addTo(map);
+
+    // 지도를 현재 위치로 이동 (줌 레벨 18로 고정)
+    map.setView(e.latlng, 18);
+    
+    // [중요] 위치를 한 번 찾았으므로 추적 기능을 즉시 종료 (배터리 절약 및 화면 튕김 방지)
+    map.stopLocate();
+}
+
+function onLocationError(e) {
+    alert("위치 정보를 가져올 수 없습니다. GPS 권한을 확인하세요.");
+}
+
+map.on('locationfound', onLocationFound);
+map.on('locationerror', onLocationError);
+
+// 버튼 클릭 시 호출되는 함수
+function startTracking() {
+    // watch: false 로 설정하여 실시간 추적을 끕니다.
+    map.locate({
+        setView: false, 
+        watch: false, 
+        enableHighAccuracy: true 
+    });
+}
+</script>
+</body>
+</html>
