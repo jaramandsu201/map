@@ -1,0 +1,28 @@
+[
+  {
+    "file": "가공.geojson",
+    "color": "yellow",
+    "name": "가공라인"
+  },
+  {
+    "file": "조사지점.geojson",
+    "color": "blue",
+    "name": "조사지점",
+    "fields": ["id", "addr"] 
+  },
+{
+    "file": "154kV.geojson",
+    "color": "#91522d",
+    "name": "154kV"
+  },
+{
+    "file": "756kV.geojson",
+    "color": "green",
+    "name": "756kV"
+  },
+{
+    "file": "345kV.geojson",
+    "color": "red",
+    "name": "345kV"
+  }
+]
