@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>실시간 현장조사 시스템</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        body { margin:0; padding:0; }
+        #map { height: 100vh; width: 100vw; background: #f0f0f0; }
+        .location-control { position: absolute; bottom: 30px; right: 20px; z-index: 1000; }
+        .loc-btn {
+            width: 55px; height: 55px; background: white; border: 2px solid #0055ff;
+            border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="location-control">
+    <button class="loc-btn" onclick="manualLocate()">📍</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// 1. 지도 및 브이월드 배경 설정
+var map = L.map('map').setView([36.5, 127.5], 7);
+L.tileLayer('https://xdworld.vworld.kr/2d/Satellite/service/{z}/{x}/{y}.jpeg', {
+    attribution: '&copy; V-World / MOLIT',
+    maxZoom: 19
+}).addTo(map);
+
+// 2. 공통 팝업 설정
+function onEachFeature(feature, layer) {
+    if (feature.properties) {
+        var content = Object.entries(feature.properties)
+            .map(([k, v]) => `<b>${k}:</b> ${v || '없음'}`).join("<br>");
+        layer.bindPopup(content);
+    }
+}
+
+// 3. [핵심] config.json을 읽어와서 모든 레이어를 자동 로드
+fetch('./config.json')
+    .then(res => res.json())
+    .then(layers => {
+        let bounds = L.latLngBounds();
+        let loadedCount = 0;
+
+        layers.forEach(info => {
+            fetch(`./${info.file}`)
+                .then(res => res.json())
+                .then(data => {
+                    var geoLayer = L.geoJSON(data, {
+                        style: { color: info.color, weight: 3, opacity: 0.8 },
+                        pointToLayer: (feat, latlng) => L.circleMarker(latlng, {
+                            radius: 7, fillColor: info.color, color: "#fff", weight: 2, fillOpacity: 0.9
+                        }),
+                        onEachFeature: onEachFeature
+                    }).addTo(map);
+
+                    // 전체 레이어가 다 보이게 영역 확장
+                    if (data.features.length > 0) {
+                        bounds.extend(geoLayer.getBounds());
+                        map.fitBounds(bounds);
+                    }
+                })
+                .catch(e => console.error(`${info.file} 로드 실패`, e));
+        });
+    });
+
+// 4. 위치 추적 (버튼 클릭 시 1회 이동)
+var currentMarker, currentCircle;
+map.on('locationfound', function(e) {
+    if (currentMarker) map.removeLayer(currentMarker);
+    if (currentCircle) map.removeLayer(currentCircle);
+    currentMarker = L.circleMarker(e.latlng, { radius: 10, fillColor: '#0078ff', color: 'white', weight: 3, fillOpacity: 1 }).addTo(map);
+    currentCircle = L.circle(e.latlng, e.accuracy / 2, { color: '#0078ff', fillOpacity: 0.1 }).addTo(map);
+    map.setView(e.latlng, 18);
+    map.stopLocate();
+});
+
+function manualLocate() {
+    map.locate({ setView: false, watch: false, enableHighAccuracy: true });
+}
+</script>
+</body>
+</html>
