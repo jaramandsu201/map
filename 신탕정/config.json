@@ -18,13 +18,13 @@
 
    {
     "file": "154kV 명칭.geojson",
-    "color": "red",
+    "color": "blue",
     "name": "154kV 명칭",
      "fields": ["Text"]
  },
    {
     "file": "345kV 명칭.geojson",
-    "color": "blue",
+    "color": "red",
     "name": "345kV 명칭",
      "fields": ["Text"]
  },
@@ -53,4 +53,5 @@
     "name": "조사지점_신탕정",
     "fields": ["fid", "주소"] 
   }
+
 ]
