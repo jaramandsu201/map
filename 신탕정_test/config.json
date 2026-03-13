@@ -1,0 +1,13 @@
+[
+  {
+    "file": "가공.geojson",
+    "color": "yellow",
+    "name": "가공라인"
+  },
+  {
+    "file": "조사지점_신탕정.geojson",
+    "color": "blue",
+    "name": "조사지점",
+    "fields": ["id", "addr"] 
+  }
+]
